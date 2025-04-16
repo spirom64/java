@@ -34,6 +34,8 @@ final class StaticViewContentParser extends ModelViewContentParser {
             } else {
                 new StaticViewExpressionParser().parseIdentifier(token, context).forEach(mi -> addModelItemToView(mi, view, token));
             }
+
+            view.addInclude(token);
         }
     }
 
@@ -53,6 +55,8 @@ final class StaticViewContentParser extends ModelViewContentParser {
             } else {
                 new StaticViewExpressionParser().parseIdentifier(token, context).forEach(mi -> removeModelItemFromView(mi, view));
             }
+
+            view.addExclude(token);
         }
     }
 

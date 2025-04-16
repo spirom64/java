@@ -1,6 +1,7 @@
 package com.structurizr.dsl;
 
 import com.structurizr.Workspace;
+import com.structurizr.dsl.register.FilesRegister;
 import com.structurizr.model.CreateImpliedRelationshipsUnlessAnyRelationshipExistsStrategy;
 import com.structurizr.model.Element;
 import com.structurizr.model.Relationship;
@@ -70,10 +71,15 @@ final class WorkspaceParser extends AbstractParser {
                                     workspace = WorkspaceUtils.loadWorkspaceFromJson(file);
                                     registerIdentifiers(workspace, context);
                                 } else {
+                                    FilesRegister.startParentRegister();
+                                    FilesRegister.setRoot(new FilesRegister.FilesTree.FileNode(file));
+
                                     StructurizrDslParser structurizrDslParser = new StructurizrDslParser();
                                     structurizrDslParser.parse(context, file);
                                     workspace = structurizrDslParser.getWorkspace();
                                     context.getParser().configureFrom(structurizrDslParser);
+
+                                    FilesRegister.popRegister();
                                 }
                             }
                         }

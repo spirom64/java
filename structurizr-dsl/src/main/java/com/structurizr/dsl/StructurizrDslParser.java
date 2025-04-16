@@ -2,6 +2,7 @@ package com.structurizr.dsl;
 
 import com.structurizr.PropertyHolder;
 import com.structurizr.Workspace;
+import com.structurizr.dsl.register.FilesRegister;
 import com.structurizr.model.*;
 import com.structurizr.util.StringUtils;
 import com.structurizr.view.*;
@@ -210,6 +211,11 @@ public final class StructurizrDslParser extends StructurizrDslTokens {
     void parse(List<String> lines, File dslFile, boolean fragment, boolean includeInDslSourceLines) throws StructurizrDslParserException {
         List<DslLine> dslLines = preProcessLines(lines);
 
+        if (workspace == null && FilesRegister.getCurrentNode() == null) {
+            FilesRegister.reset();
+            FilesRegister.setRoot(new FilesRegister.FilesTree.FileNode(dslFile));
+        }
+
         for (DslLine dslLine : dslLines) {
             String line = dslLine.getSource();
             String lineForDslSource = line;
@@ -276,7 +282,11 @@ public final class StructurizrDslParser extends StructurizrDslTokens {
                                     paddedLines.add(leadingSpace + unpaddedLine);
                                 }
 
+                                FilesRegister.addFileAndStartContext(includedFile.getFile());
+
                                 parse(paddedLines, includedFile.getFile(), true, true);
+
+                                FilesRegister.popContext();
                             }
                         } else {
                             throwRestrictedModeException(firstToken + " <file>");
@@ -329,6 +339,8 @@ public final class StructurizrDslParser extends StructurizrDslTokens {
                         Archetype archetype = getArchetype(RELATIONSHIP_TOKEN, tokens.get(1));
                         Relationship relationship = new ExplicitRelationshipParser().parse(getContext(), tokens.withoutContextStartToken(), archetype);
 
+                        addRelationshipParent(relationship);
+
                         if (shouldStartContext(tokens)) {
                             startContext(new RelationshipDslContext(relationship));
                         }
@@ -341,6 +353,8 @@ public final class StructurizrDslParser extends StructurizrDslTokens {
                         Archetype archetype = getArchetype(RELATIONSHIP_TOKEN, tokens.get(1));
                         Relationship relationship = new ImplicitRelationshipParser().parse(getContext(ElementDslContext.class), tokens.withoutContextStartToken(), archetype);
 
+                        addRelationshipParent(relationship);
+
                         if (shouldStartContext(tokens)) {
                             startContext(new RelationshipDslContext(relationship));
                         }
@@ -351,6 +365,10 @@ public final class StructurizrDslParser extends StructurizrDslTokens {
                         Archetype archetype = getArchetype(RELATIONSHIP_TOKEN, tokens.get(1));
                         Set<Relationship> relationships = new ExplicitRelationshipParser().parse(getContext(ElementsDslContext.class), tokens.withoutContextStartToken(), archetype);
 
+                        relationships
+                            .stream()
+                            .forEach(this::addRelationshipParent);
+
                         if (shouldStartContext(tokens)) {
                             startContext(new RelationshipsDslContext(getContext(), relationships));
                         }
@@ -358,6 +376,10 @@ public final class StructurizrDslParser extends StructurizrDslTokens {
                     } else if (tokens.size() >= 2 && isRelationshipKeywordOrArchetype(tokens.get(0)) && inContext(ElementsDslContext.class)) {
                         Archetype archetype = getArchetype(RELATIONSHIP_TOKEN, tokens.get(1));
                         Set<Relationship> relationships = new ImplicitRelationshipParser().parse(getContext(ElementsDslContext.class), tokens.withoutContextStartToken(), archetype);
+
+                        relationships
+                            .stream()
+                            .forEach(this::addRelationshipParent);
 
                         if (shouldStartContext(tokens)) {
                             startContext(new RelationshipsDslContext(getContext(), relationships));
@@ -1479,6 +1501,21 @@ public final class StructurizrDslParser extends StructurizrDslTokens {
         }
 
         return clazz.isAssignableFrom(contextStack.peek().getClass());
+    }
+
+    private void addRelationshipParent(Relationship relationship) {
+        DslContext currentContext = getContext();
+        if (isGroup(currentContext)) {
+            relationship.setParentGroup(((GroupableDslContext)currentContext).getGroup().getName());
+        }
+
+        if (inContext(ElementDslContext.class)) {
+            relationship.setParentElement(((ElementDslContext)currentContext).getElement());
+        }
+
+        if (inContext(DeploymentEnvironmentDslContext.class)) {
+            relationship.setParentDeploymentEnvironment(((DeploymentEnvironmentDslContext)currentContext).getEnvironment().getName());
+        }
     }
 
 }

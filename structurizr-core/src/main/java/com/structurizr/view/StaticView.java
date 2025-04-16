@@ -17,6 +17,12 @@ public abstract class StaticView extends ModelView implements AnimatedView {
     @Nonnull
     private List<Animation> animations = new ArrayList<>();
 
+    @Nonnull
+    private final Set<String> includes = new HashSet<>();
+
+    @Nonnull
+    private final Set<String> excludes = new HashSet<>();
+
     StaticView() {
     }
 
@@ -276,4 +282,21 @@ public abstract class StaticView extends ModelView implements AnimatedView {
         removeElement(customElement);
     }
 
+    public void addInclude(String include) {
+        this.includes.add(include);
+    }
+
+    public void addExclude(String include) {
+        this.excludes.add(include);
+    }
+
+    @Nonnull
+    public Set<String> getIncludes() {
+        return includes;
+    }
+
+    @Nonnull
+    public Set<String> getExcludes() {
+        return excludes;
+    }
 }
