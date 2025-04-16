@@ -1,8 +1,8 @@
 package com.structurizr.dsl;
 
 import com.structurizr.util.Url;
+import com.structurizr.view.Configuration;
 import com.structurizr.view.ThemeUtils;
-
 import java.io.File;
 
 final class ThemeParser extends AbstractParser {
@@ -37,13 +37,20 @@ final class ThemeParser extends AbstractParser {
     }
 
     private void addTheme(DslContext context, File dslFile, String theme) {
+        Configuration configuration = context.getWorkspace().getViews().getConfiguration();
+
         if (DEFAULT_THEME_NAME.equalsIgnoreCase(theme)) {
             theme = DEFAULT_THEME_URL;
+            configuration.addOriginalTheme(DEFAULT_THEME_NAME);
         }
 
         if (Url.isUrl(theme)) {
             // this adds the theme to the list of theme URLs in the workspace
-            context.getWorkspace().getViews().getConfiguration().addTheme(theme);
+            configuration.addTheme(theme);
+
+            if (!theme.equals(DEFAULT_THEME_URL)) {
+                configuration.addOriginalTheme(theme);
+            }
         } else {
             // this inlines the file-based theme into the workspace
             File file = new File(dslFile.getParentFile(), theme);
@@ -51,6 +58,7 @@ final class ThemeParser extends AbstractParser {
                 if (file.isFile()) {
                     try {
                         ThemeUtils.inlineTheme(context.getWorkspace(), file);
+                        configuration.addOriginalTheme(theme);
                     } catch (Exception e) {
                         throw new RuntimeException("Error loading theme from " + file.getAbsolutePath() + ": " + e.getMessage());
                     }

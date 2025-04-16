@@ -15,6 +15,7 @@ public final class Configuration implements PropertyHolder {
     private Branding branding = new Branding();
     private Styles styles = new Styles();
     private List<String> themes = new ArrayList<>();
+    private List<String> originalThemes = new ArrayList<>();
     private Terminology terminology = new Terminology();
 
     private MetadataSymbols metadataSymbols;
@@ -80,6 +81,16 @@ public final class Configuration implements PropertyHolder {
             } else {
                 throw new IllegalArgumentException(url + " is not a valid URL.");
             }
+        }
+    }
+
+    public List<String> getOriginalThemes() {
+        return originalThemes;
+    }
+
+    public void addOriginalTheme(String theme) {
+        if (theme != null && theme.trim().length() > 0 && !originalThemes.contains(theme)) {
+            originalThemes.add(theme.trim());
         }
     }
 

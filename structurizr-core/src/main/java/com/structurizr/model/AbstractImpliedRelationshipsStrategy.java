@@ -40,7 +40,7 @@ public abstract class AbstractImpliedRelationshipsStrategy implements ImpliedRel
      */
     protected Relationship createImpliedRelationship(Relationship relationship, Element source, Element destination) {
         Model model = relationship.getModel();
-        Relationship impliedRelationship = model.addRelationship(source, destination, relationship.getDescription(), relationship.getTechnology(), false);
+        Relationship impliedRelationship = model.addRelationship(source, destination, relationship.getDescription(), relationship.getTechnology(), false, true);
         if (impliedRelationship != null) {
             impliedRelationship.setLinkedRelationshipId(relationship.getId());
         }
