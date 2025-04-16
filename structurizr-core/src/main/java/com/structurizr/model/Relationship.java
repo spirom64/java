@@ -23,6 +23,10 @@ public final class Relationship extends ModelItem {
 
     private String linkedRelationshipId;
 
+    private String parentGroup;
+    private String parentDeploymentEnvironment;
+    private Element parentElement;
+
     Relationship() {
     }
 
@@ -146,6 +150,30 @@ public final class Relationship extends ModelItem {
 
     void setLinkedRelationshipId(String baseRelationshipId) {
         this.linkedRelationshipId = baseRelationshipId;
+    }
+
+    public String getParentGroup() {
+        return parentGroup;
+    }
+
+    public void setParentGroup(String parentGroup) {
+        this.parentGroup = parentGroup;
+    }
+
+    public Element getParentElement() {
+        return parentElement;
+    }
+
+    public void setParentElement(Element parentElement) {
+        this.parentElement = parentElement;
+    }
+
+    public String getParentDeploymentEnvironment() {
+        return parentDeploymentEnvironment;
+    }
+
+    public void setParentDeploymentEnvironment(String parentDeploymentEnvironment) {
+        this.parentDeploymentEnvironment = parentDeploymentEnvironment;
     }
 
     @Override
